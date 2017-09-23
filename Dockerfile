@@ -12,4 +12,8 @@ RUN pip3 install selenium xvfbwrapper pyyaml requests
 
 WORKDIR /app
 ADD "py/*" /app/
+CMD ["wget", "https://github.com/mozilla/geckodriver/releases/download/v0.18.0/geckodriver-v0.18.0-linux64.tar.gz"]
+CMD ["tar", "-xvzf", "geckodriver*"]
+CMD ["chmod", "+x", "geckodriver"]
+CMD ["cp", "geckodriver", '/bin/']
 CMD ["python3.4", "/app/app.py"]
