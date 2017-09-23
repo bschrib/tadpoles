@@ -15,5 +15,5 @@ ADD "py/*" /app/
 CMD ["wget", "https://github.com/mozilla/geckodriver/releases/download/v0.18.0/geckodriver-v0.18.0-linux64.tar.gz"]
 CMD ["tar", "-xvzf", "geckodriver*"]
 CMD ["chmod", "+x", "geckodriver"]
-CMD ["cp", "geckodriver", '/bin/']
+CMD ["cp", "geckodriver", '/usr/local/bin/']
 CMD ["python3.4", "/app/app.py"]
