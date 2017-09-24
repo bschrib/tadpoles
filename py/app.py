@@ -62,7 +62,7 @@ class DownloadError(Exception):
 class Client:
 
     COOKIE_FILE = "state/cookies.pkl"
-    ROOT_URL = "http://tadpoles.com/"
+    ROOT_URL = "http://www.tadpoles.com/"
     HOME_URL = "https://www.tadpoles.com/parents"
     MIN_SLEEP = 1
     MAX_SLEEP = 3
@@ -133,40 +133,70 @@ class Client:
         '''Switch to the other window.'''
         self.info("Switching windows.")
         all_windows = set(self.br.window_handles)
+        self.info(all_windows)
         current_window = set([self.br.current_window_handle])
+        self.info(current_window)
         other_window = (all_windows - current_window).pop()
-        br.switch_to.window(other_window)
+        self.br.switch_to.window(other_window)
 
     def do_login(self):
         # Navigate to login page.
         self.info("Navigating to login page.")
         self.br.find_element_by_id("login-button").click()
         self.br.find_element_by_class_name("tp-block-half").click()
-        self.br.find_element_by_class_name("other-login-button").click()
+
+        for element in self.br.find_elements_by_tag_name("img"):
+            if "btn-google.png" in element.get_attribute("src"):
+                self.info(element)
+                self.info("Clicking Google Button.")
+                element.click()
+
+        #self.info(self.br.find_element_by_xpath('//img[@data-bind="click:loginGoogle"]').get_attribute('innerHTML'))
+        #self.br.find_element_by_class_name("other-login-button").click()
+
+        # Sleeping really quick.
+        self.info("Sleeping 2 seconds.")
+        self.sleep(minsleep=2)
 
         # Focus on the google auth popup.
         self.switch_windows()
 
         # Enter email.
-        email = self.br.find_element_by_id("Email")
+        email = self.br.find_element_by_id("identifierId")
         email.send_keys(input("Enter email: "))
         email.submit()
+        self.br.find_element_by_id("identifierNext").click()
 
-        # Enter password.
-        passwd = self.br.find_element_by_id("Passwd")
-        passwd.send_keys(getpass("Enter password:"))
-        passwd.submit()
-
-        # Enter 2FA pin.
-        pin = self.br.find_element_by_id("idvPreregisteredPhonePin")
-        pin.send_keys(getpass("Enter google verification code: "))
-        pin.submit()
-
-        # Click "approve".
         self.info("Sleeping 2 seconds.")
         self.sleep(minsleep=2)
-        self.info("Clicking 'approve' button.")
-        self.br.find_element_by_id("submit_approve_access").click()
+
+        # Enter password.
+        #passwd = self.br.find_element_by_id("password")
+        #passwd.send_keys(getpass("Enter password:"))
+        #passwd.submit()
+
+        password = self.br.find_element_by_name("password")
+        password.send_keys(getpass("Enter password:"))
+        password.submit()
+        self.br.find_element_by_id("passwordNext").click()
+
+        self.info("Sleeping 2 seconds.")
+        self.sleep(minsleep=2)
+
+        # Enter 2FA pin.
+        pin = self.br.find_element_by_id("totpPin")
+        pin.send_keys(getpass("Enter google verification code: "))
+        pin.submit()
+        self.br.find_element_by_id("totpNext").click()
+
+        self.info("Sleeping 2 seconds.")
+        self.sleep(minsleep=2)
+
+        # Click "approve".
+        #self.info("Sleeping 2 seconds.")
+        #self.sleep(minsleep=2)
+        #self.info("Clicking 'approve' button.")
+        #self.br.find_element_by_id("submit_approve_access").click()
 
         # Switch back to tadpoles.
         self.switch_windows()
@@ -261,6 +291,9 @@ class Client:
         except FileNotFoundError:
             self.do_login()
             self.dump_cookies()
+            self.load_cookies()
+            self.add_cookies_to_browser()
+            self.navigate_url(self.HOME_URL)
         else:
             self.add_cookies_to_browser()
             self.navigate_url(self.HOME_URL)
