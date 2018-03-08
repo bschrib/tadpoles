@@ -7,6 +7,7 @@ import shutil
 import pickle
 import logging
 import logging.config
+import imghdr
 
 from random import randrange
 from getpass import getpass
@@ -283,12 +284,16 @@ class Client:
 
         # Make the local filename.
         _, key = url.split("key=")
-        filename_parts = ['img', self.year.text, self.month.text, '%s.jpg']
-        filename = abspath(join(*filename_parts) % key)
+        filename_parts = ['img', self.year.text, self.month.text, '%s']
+        filename_base = abspath(join(*filename_parts) % key)
+        filename = filename_base + '.jpg'
 
         # Only download if the file doesn't already exist.
         if isfile(filename):
             self.debug("Already downloaded: %s" % filename)
+            return
+        elif isfile(filename_base + '.png'):
+            self.debug("Already downloaded: %s.png" % filename_base)
             return
         else:
             self.info("Saving: %s" % filename)
@@ -309,6 +314,11 @@ class Client:
             msg = 'Error (%r) downloading %r'
             raise DownloadError(msg % (resp.status_code, url))
 
+        ## check if the file is actually a png
+        imgtype = imghdr.what(filename)
+        if imghdr.what(filename) == 'png':
+            self.info("  File is a png - renaming")
+            os.rename(filename, filename_base + '.png')
     def download_images(self):
         '''Login to tadpoles.com and download all user's images.
         '''
