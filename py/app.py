@@ -144,6 +144,34 @@ class Client:
         self.info("Navigating to login page.")
         self.br.find_element_by_id("login-button").click()
         self.br.find_element_by_class_name("tp-block-half").click()
+        self.br.find_element_by_class_name("other-login-button").click()
+
+        self.info(self.br.current_url)
+
+        # Enter email.
+        self.info("  Sending username.")
+        email = self.br.find_element_by_css_selector(".controls input[type='text']")
+        email.send_keys(input("Enter email: "))
+
+        # Enter password.
+        self.info("  Sending password.")
+        passwd = self.br.find_element_by_css_selector(".controls input[type='password']")
+        passwd.send_keys(input("Enter password: "))
+
+        # Click "submit".
+        self.info("Sleeping 2 seconds.")
+        self.sleep(minsleep=2)
+        self.info("Clicking 'sumbit' button.")
+        self.br.find_element_by_css_selector(".tp-left-contents .btn-primary").click()
+        self.sleep(minsleep=2)
+        self.info("New url")
+        self.info(self.br.current_url)
+
+    def do_google_login(self):
+        # Navigate to login page.
+        self.info("Navigating to login page.")
+        self.br.find_element_by_id("login-button").click()
+        self.br.find_element_by_class_name("tp-block-half").click()
 
         for element in self.br.find_elements_by_tag_name("img"):
             if "btn-google.png" in element.get_attribute("src"):
@@ -289,7 +317,21 @@ class Client:
         try:
             self.load_cookies()
         except FileNotFoundError:
-            self.do_login()
+
+            login_type = None
+            while login_type is None:
+                input_value = input("Login Type - [G]oogle or [E]mail/password: ")
+                if input_value == 'G' or input_value == 'g':
+                    login_type = 'google'
+                    self.info("Doing Google login...")
+                    self.do_google_login()
+                elif input_value == "E" or input_value == "e":
+                    login_type = 'email'
+                    self.info("Doing Email login...")
+                    self.do_login()
+                else:
+                    self.info("-- Invalid choice entered - please choose 'G' or 'E'")
+
             self.dump_cookies()
             self.load_cookies()
             self.add_cookies_to_browser()
