@@ -268,7 +268,7 @@ class Client:
             self.warning("Getting urls for month: %r" % month.text)
             self.sleep(minsleep=2)
             re_url = re.compile('\("([^"]+)')
-            for div in self.br.find_elements_by_xpath("//li/div"):
+            for div in self.br.find_elements_by_xpath("//div[@class='well left-panel pull-left']/ul/li/div"):
                 url = re_url.search(div.get_attribute("style"))
                 if not url:
                     continue
