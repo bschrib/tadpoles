@@ -276,9 +276,12 @@ class Client:
                 url = url.replace('thumbnail=true', '')
                 url = url.replace('&thumbnail=true', '')
                 url = 'https://www.tadpoles.com' + url
-                yield url
+                daymonth = div.find_element_by_xpath("./div/div[@class='header note mask']/span[@class='name']/span").text
+                dayarray = daymonth.split('/')
+                day = format(int(dayarray[1]), '02d')
+                yield url, day
 
-    def save_image(self, url):
+    def save_image(self, url, day):
         '''Save an image locally using requests.
         '''
 
@@ -305,6 +308,7 @@ class Client:
             os.makedirs(dr)
 
         # Download it with requests.
+
         resp = requests.get(url, cookies=self.req_cookies, stream=True)
         if resp.status_code == 200:
             with open(filename, 'wb') as f:
@@ -314,11 +318,23 @@ class Client:
             msg = 'Error (%r) downloading %r'
             raise DownloadError(msg % (resp.status_code, url))
 
+        ## set date for exif
+        months = dict(jan="01", feb="02", mar="03", apr="04", may="05", jun="06", jul="07", aug="08", sep="09", oct="10", nov="11", dec="12")
+        yearmonth = self.year.text + ':' + months[self.month.text] + ':' + day + ' 12:00:00'
         ## check if the file is actually a png
         imgtype = imghdr.what(filename)
         if imghdr.what(filename) == 'png':
             self.info("  File is a png - renaming")
             os.rename(filename, filename_base + '.png')
+            filename = filename_base + '.png'
+            command = 'exiftool -overwrite_original "-PNG:CreationTime=' + yearmonth + '" "' + filename + '"'
+            self.info("  Adding png exif: %s" % command)
+            os.system(command)
+
+        command = 'exiftool -overwrite_original "-AllDates=' + yearmonth + '" "' + filename + '"'
+        self.info("  Adding exif: %s" % command)
+        os.system(command)
+
     def download_images(self):
         '''Login to tadpoles.com and download all user's images.
         '''
@@ -355,7 +371,7 @@ class Client:
 
         for url in self.iter_urls():
             try:
-                self.save_image(url)
+                self.save_image(url[0], url[1])
             except DownloadError as exc:
                 self.exception(exc)
 
