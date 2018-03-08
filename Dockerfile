@@ -8,6 +8,10 @@ RUN apt-get install -qyy \
     python-virtualenv python3.4-dev python3-setuptools \
     python3-pip xvfb firefox python3-lxml curl
 
+RUN apt-get install -qyy \
+    -o APT::Install-Recommends=true -o APT::Install-Suggests=true \
+    exiftool
+
 RUN pip3 install selenium xvfbwrapper pyyaml requests
 
 WORKDIR /app
