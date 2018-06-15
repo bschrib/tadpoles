@@ -65,6 +65,8 @@ class Client:
     COOKIE_FILE = "state/cookies.pkl"
     ROOT_URL = "http://www.tadpoles.com/"
     HOME_URL = "https://www.tadpoles.com/parents"
+    BH_URL = "https://familyinfocenter.brighthorizons.com/Account/Login"
+    LOGIN_URL = "https://familyinfocenter.brighthorizons.com/MyBrightDay/Redirect"
     MIN_SLEEP = 1
     MAX_SLEEP = 3
 
@@ -120,8 +122,8 @@ class Client:
     def add_cookies_to_browser(self):
         self.info("Adding the cookies to the browser.")
         for cookie in self.cookies:
-            if self.br.current_url.strip('/').endswith(cookie['domain']):
-                self.br.add_cookie(cookie)
+            #if self.br.current_url.strip('/').endswith(cookie['domain']):
+            self.br.add_cookie(cookie)
 
     def requestify_cookies(self):
         # Cookies in the form reqeusts expects.
@@ -143,27 +145,37 @@ class Client:
     def do_login(self):
         # Navigate to login page.
         self.info("Navigating to login page.")
-        self.br.find_element_by_id("login-button").click()
-        self.br.find_element_by_class_name("tp-block-half").click()
-        self.br.find_element_by_class_name("other-login-button").click()
+        self.navigate_url(self.BH_URL)
+
+        # self.br.find_element_by_id("login-button").click()
+        # self.br.find_element_by_class_name("tp-block-half").click()
+        # self.br.find_element_by_class_name("other-login-button").click()
 
         self.info(self.br.current_url)
 
         # Enter email.
         self.info("  Sending username.")
-        email = self.br.find_element_by_css_selector(".controls input[type='text']")
+        email = self.br.find_element_by_id("UserName")
         email.send_keys(input("Enter email: "))
 
         # Enter password.
         self.info("  Sending password.")
-        passwd = self.br.find_element_by_css_selector(".controls input[type='password']")
+        passwd = self.br.find_element_by_id("Password")
         passwd.send_keys(input("Enter password: "))
 
         # Click "submit".
         self.info("Sleeping 2 seconds.")
         self.sleep(minsleep=2)
         self.info("Clicking 'sumbit' button.")
-        self.br.find_element_by_css_selector(".tp-left-contents .btn-primary").click()
+        self.br.find_element_by_css_selector("input[type=\"submit\"]").click()
+        self.sleep(minsleep=2)
+        self.info("New url")
+        self.info(self.br.current_url)
+        self.navigate_url(self.LOGIN_URL)
+        self.sleep(minsleep=2)
+        self.info("New url")
+        self.info(self.br.current_url)
+        self.navigate_url(self.HOME_URL)
         self.sleep(minsleep=2)
         self.info("New url")
         self.info(self.br.current_url)
@@ -338,7 +350,7 @@ class Client:
     def download_images(self):
         '''Login to tadpoles.com and download all user's images.
         '''
-        self.navigate_url(self.ROOT_URL)
+        self.navigate_url(self.BH_URL)
 
         try:
             self.load_cookies()
