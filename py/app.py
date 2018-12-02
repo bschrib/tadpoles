@@ -343,9 +343,21 @@ class Client:
             self.info("  Adding png exif: %s" % command)
             os.system(command)
 
-        command = 'exiftool -overwrite_original "-AllDates=' + yearmonth + '" "' + filename + '"'
-        self.info("  Adding exif: %s" % command)
-        os.system(command)
+            command = 'exiftool -overwrite_original "-AllDates=' + yearmonth + '" "' + filename + '"'
+            self.info("  Adding exif: %s" % command)
+            os.system(command)
+        else:
+            ## video 
+            self.info("  File is a video - renaming")
+            os.rename(filename, filename_base + '.mp4')
+            #filename = filename_base + '.mp4'
+            #command = 'exiftool -overwrite_original "-PNG:CreationTime=' + yearmonth + '" "' + filename + '"'
+            #self.info("  Adding png exif: %s" % command)
+            #os.system(command)
+
+        #command = 'exiftool -overwrite_original "-AllDates=' + yearmonth + '" "' + filename + '"'
+        #self.info("  Adding exif: %s" % command)
+        #os.system(command)
 
     def download_images(self):
         '''Login to tadpoles.com and download all user's images.
