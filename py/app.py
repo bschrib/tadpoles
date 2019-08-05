@@ -322,7 +322,6 @@ class Client:
         dr = dirname(filename)
         if not isdir(dr):
             os.makedirs(dr)
-            info.self("Made directory {}".format(dr))
 
         # Download it with requests.
         resp = requests.get(url, cookies=self.req_cookies, stream=True)
@@ -343,33 +342,13 @@ class Client:
         uniqueFileName = timeNow.strftime("%H%M%S%f")
         newFileName = os.path.abspath(os.path.join(filename_base, os.pardir)) + '/' + yearmonth.replace(':','').replace(' 120000','') + '_tadpoles_' + uniqueFileName
         # Get away from cases for each filetype and just build it for any type
-        self.info("  File is a {} - renaming".format(imgtype))
-        os.rename(filename, newFileName + '.' + imgtype)
-        filename = newFileName + '.' + imgtype
-        command = 'exiftool -overwrite_original "-AllDates=' + yearmonth + '" "' + filename + '"'
-        self.info("  Adding exif: %s" % command)
-        os.system(command)
-        #if imgtype == 'png':
-        #    self.info("  File is a png - renaming")
-        #    os.rename(filename, newFileName + '.png')
-        #    filename = newFileName + '.png'
-        #    command = 'exiftool -overwrite_original "-AllDates=' + yearmonth + '" "' + filename + '"'
-        #    self.info("  Adding exif: %s" % command)
-        #    os.system(command)
-        #elif imgtype == 'jpeg':
-        #    self.info("  File is a jpeg - renaming")
-        #    os.rename(filename, newFileName + '.jpeg')
-        #    filename = newFileName + '.jpeg'
-        #    command = 'exiftool -overwrite_original "-AllDates=' + yearmonth + '" "' + filename + '"'
-        #    self.info("  Adding exif: %s" % command)
-        #    os.system(command)
-        #else:
-        #    self.info("  File is a video - renaming")
-        #    os.rename(filename, newFileName + '.mp4')
-        #    filename = newFileName + '.mp4'
-        #    command = 'exiftool -overwrite_original "-AllDates=' + yearmonth + '" "' + filename + '"'
-        #    self.info("  Adding exif: %s" % command)
-        #    os.system(command)
+        if imgtype:
+            self.info("  File is a {} - renaming".format(imgtype))
+            os.rename(filename, newFileName + '.' + imgtype)
+            filename = newFileName + '.' + imgtype
+            command = 'exiftool -overwrite_original "-AllDates=' + yearmonth + '" "' + filename + '"'
+            self.info("  Adding exif: %s" % command)
+            os.system(command)
 
     def download_images(self):
         '''Login to tadpoles.com and download all user's images.
